@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart | AlphaShop{% endblock %}
+
+{% block content %}
+<div class="container cart-page-container">
+    <div class="page-header-box">
+        <h1 class="page-title"><i class="fa-solid fa-cart-shopping"></i> Shopping Cart</h1>
+        <p class="page-subtitle">Review your selected items before proceeding to checkout</p>
+    </div>
+
+    {% if cart_items %}
+        <!-- Free Shipping Progress Banner -->
+        <div class="shipping-progress-card">
+            {% if is_free_shipping %}
+                <div class="progress-message text-success">
+                    <i class="fa-solid fa-circle-check"></i> Congratulations! You qualify for <strong>FREE standard shipping</strong>!
+                </div>
+            {% else %}
+                <div class="progress-message">
+                    <i class="fa-solid fa-truck-fast"></i> Add <strong>${{ remaining_for_free_shipping }}</strong> more of items to unlock <strong>FREE Shipping</strong>!
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="cart-layout-grid">
+            <!-- Items Table/List Column -->
+            <div class="cart-items-section">
+                <div class="cart-table-wrapper">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                                <tr>
+                                    <!-- Product Info -->
+                                    <td class="cart-item-meta">
+                                        <div class="cart-item-flex">
+                                            <a href="{% url 'product_detail' item.product.id %}" class="cart-item-thumb">
+                                                <img src="{{ item.product.display_image }}" alt="{{ item.product.name }}">
+                                            </a>
+                                            <div>
+                                                <span class="category-micro">{{ item.product.category }}</span>
+                                                <h4 class="cart-product-title">
+                                                    <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a>
+                                                </h4>
+                                                <small class="stock-info">Stock: {{ item.product.stock }} available</small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Price -->
+                                    <td class="cart-unit-price">${{ item.price }}</td>
+
+                                    <!-- Quantity Stepper Form -->
+                                    <td>
+                                        <div class="cart-qty-widget">
+                                            <form action="{% url 'update_cart_quantity' item.product.id %}" method="POST" class="inline-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="decrease">
+                                                <button type="submit" class="qty-btn-sm" title="Decrease Quantity"><i class="fa-solid fa-minus"></i></button>
+                                            </form>
+                                            <span class="qty-number">{{ item.quantity }}</span>
+                                            <form action="{% url 'update_cart_quantity' item.product.id %}" method="POST" class="inline-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="increase">
+                                                <button type="submit" class="qty-btn-sm" {% if item.quantity >= item.product.stock %}disabled{% endif %} title="Increase Quantity">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+
+                                    <!-- Line Subtotal -->
+                                    <td class="cart-line-total"><strong>${{ item.line_total }}</strong></td>
+
+                                    <!-- Delete Item -->
+                                    <td>
+                                        <a href="{% url 'remove_from_cart' item.product.id %}" class="btn-remove-item" title="Remove from Cart" onclick="return confirm('Remove {{ item.product.name }} from cart?');">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="cart-actions-row">
+                    <a href="{% url 'home' %}#productCatalog" class="btn btn-outline">
+                        <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order Summary Column -->
+            <div class="cart-summary-section">
+                <div class="summary-card">
+                    <h3 class="summary-title">Order Summary</h3>
+                    
+                    <div class="summary-line">
+                        <span>Items Subtotal</span>
+                        <span>${{ subtotal }}</span>
+                    </div>
+
+                    <div class="summary-line">
+                        <span>Estimated Shipping</span>
+                        <span>
+                            {% if shipping == 0 %}
+                                <span class="badge-free">FREE</span>
+                            {% else %}
+                                ${{ shipping }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="summary-line">
+                        <span>Estimated Tax (8%)</span>
+                        <span>${{ tax }}</span>
+                    </div>
+
+                    <hr class="summary-divider">
+
+                    <div class="summary-line total-line">
+                        <span>Total Due</span>
+                        <span class="grand-total-amount">${{ grand_total }}</span>
+                    </div>
+
+                    <div class="checkout-btn-wrap">
+                        <a href="{% url 'checkout' %}" class="btn btn-primary btn-lg btn-block">
+                            Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="summary-guarantees">
+                        <p><i class="fa-solid fa-lock"></i> Simulated End-to-End Order Processing</p>
+                        <p><i class="fa-solid fa-clock-rotate-left"></i> Instant Stock Reservation & Database Sync</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Empty Cart Display -->
+        <div class="empty-cart-card">
+            <div class="empty-cart-icon">
+                <i class="fa-solid fa-cart-arrow-down"></i>
+            </div>
+            <h2>Your Cart is Currently Empty</h2>
+            <p>Looks like you haven't added anything to your cart yet. Explore our featured tech products and gear!</p>
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-bag-shopping"></i> Start Shopping
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

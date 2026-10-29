@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | AlphaShop{% endblock %}
+
+{% block content %}
+<div class="container checkout-container">
+    <div class="page-header-box">
+        <h1 class="page-title"><i class="fa-solid fa-credit-card"></i> Secure Checkout</h1>
+        <p class="page-subtitle">Provide your shipping address to finalize your simulated order</p>
+    </div>
+
+    <!-- Demonstration Notice -->
+    <div class="demo-banner">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span><strong>Academic Project Simulation:</strong> This order will be recorded in SQLite without requesting real banking credentials or charging cards.</span>
+    </div>
+
+    <form method="POST" action="{% url 'checkout' %}" class="checkout-form-grid">
+        {% csrf_token %}
+
+        <!-- Left Column: Shipping & Customer Details -->
+        <div class="checkout-form-column">
+            <!-- Customer Information Card -->
+            <div class="form-section-card">
+                <h3 class="form-section-title"><i class="fa-solid fa-user"></i> Customer & Shipping Details</h3>
+                
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <label for="{{ form.full_name.id_for_label }}" class="form-label">Full Name *</label>
+                        {{ form.full_name }}
+                        {% if form.full_name.errors %}
+                            <div class="form-error">{{ form.full_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email Address *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="form-error">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="{{ form.phone.id_for_label }}" class="form-label">Phone Number *</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="form-error">{{ form.phone.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">Shipping Street Address *</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <div class="form-error">{{ form.address.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="{{ form.city.id_for_label }}" class="form-label">City *</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                            <div class="form-error">{{ form.city.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="{{ form.postal_code.id_for_label }}" class="form-label">Postal / Zip Code *</label>
+                        {{ form.postal_code }}
+                        {% if form.postal_code.errors %}
+                            <div class="form-error">{{ form.postal_code.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulated Payment Method Selection -->
+            <div class="form-section-card">
+                <h3 class="form-section-title"><i class="fa-solid fa-wallet"></i> Simulated Payment Method</h3>
+                <p class="section-help-text">Choose your preferred simulation method for recording this transaction:</p>
+
+                <div class="payment-options">
+                    <label class="payment-option selected">
+                        <input type="radio" name="payment_mode" value="cod" checked>
+                        <div class="option-details">
+                            <strong><i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery (Simulated)</strong>
+                            <small>Pay upon package arrival at your door</small>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment_mode" value="card">
+                        <div class="option-details">
+                            <strong><i class="fa-solid fa-credit-card"></i> Demo Credit / Debit Card</strong>
+                            <small>Simulated instant online authorization</small>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment_mode" value="upi">
+                        <div class="option-details">
+                            <strong><i class="fa-solid fa-qrcode"></i> Simulated UPI / QR Code</strong>
+                            <small>Instant sandbox verification</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Order Review & Submit -->
+        <div class="checkout-summary-column">
+            <div class="summary-card sticky-card">
+                <h3 class="summary-title">Order Items ({{ cart_items|length }})</h3>
+
+                <div class="checkout-items-list">
+                    {% for item in cart_items %}
+                        <div class="checkout-item">
+                            <img src="{{ item.product.display_image }}" alt="{{ item.product.name }}" class="checkout-thumb">
+                            <div class="checkout-item-details">
+                                <p class="checkout-item-name">{{ item.product.name }}</p>
+                                <span class="checkout-item-meta">{{ item.quantity }} &times; ${{ item.product.price }}</span>
+                            </div>
+                            <span class="checkout-item-subtotal">${{ item.line_total }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <hr class="summary-divider">
+
+                <div class="summary-line">
+                    <span>Subtotal</span>
+                    <span>${{ subtotal }}</span>
+                </div>
+
+                <div class="summary-line">
+                    <span>Shipping</span>
+                    <span>
+                        {% if shipping == 0 %}
+                            <span class="badge-free">FREE</span>
+                        {% else %}
+                            ${{ shipping }}
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="summary-line">
+                    <span>Tax (8%)</span>
+                    <span>${{ tax }}</span>
+                </div>
+
+                <hr class="summary-divider">
+
+                <div class="summary-line total-line">
+                    <span>Total Order Amount</span>
+                    <span class="grand-total-amount">${{ grand_total }}</span>
+                </div>
+
+                <div class="checkout-submit-wrap">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                        <i class="fa-solid fa-lock"></i> Place Order (${{ grand_total }})
+                    </button>
+                </div>
+
+                <p class="terms-note">
+                    By confirming, you agree to generate a simulated order record in SQLite database.
+                </p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

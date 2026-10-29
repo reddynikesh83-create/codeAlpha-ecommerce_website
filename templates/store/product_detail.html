@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} | AlphaShop{% endblock %}
+
+{% block content %}
+<div class="container product-detail-container">
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumb-nav">
+        <a href="{% url 'home' %}"><i class="fa-solid fa-house"></i> Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="{% url 'home' %}?category={{ product.category }}">{{ product.category }}</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">{{ product.name }}</span>
+    </nav>
+
+    <!-- Product Main Card -->
+    <div class="product-detail-layout">
+        <!-- Media Column -->
+        <div class="detail-gallery">
+            <div class="detail-main-image-wrap">
+                <img src="{{ product.display_image }}" alt="{{ product.name }}" id="mainProductImg">
+                <span class="detail-category-pill">{{ product.category }}</span>
+            </div>
+            <div class="trust-features-row">
+                <div class="trust-feat">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <div>
+                        <strong>1-Year Warranty</strong>
+                        <small>Full hardware coverage</small>
+                    </div>
+                </div>
+                <div class="trust-feat">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <div>
+                        <strong>30-Day Returns</strong>
+                        <small>Hassle-free guarantee</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Column -->
+        <div class="detail-info">
+            <div class="detail-header">
+                <div class="product-rating">
+                    <span class="star-rating">
+                        <i class="fa-solid fa-star"></i> {{ product.rating }}
+                    </span>
+                    <span class="review-count">&bull; 48 Customer Reviews</span>
+                </div>
+                <h1 class="detail-title">{{ product.name }}</h1>
+            </div>
+
+            <div class="detail-price-box">
+                <span class="detail-price">${{ product.price }}</span>
+                <span class="tax-note">Includes applicable sales taxes</span>
+            </div>
+
+            <div class="stock-status-wrap">
+                {% if product.stock > 10 %}
+                    <span class="status-badge status-in-stock"><i class="fa-solid fa-circle-check"></i> In Stock ({{ product.stock }} units available)</span>
+                {% elif product.stock > 0 %}
+                    <span class="status-badge status-low-stock"><i class="fa-solid fa-circle-exclamation"></i> Only {{ product.stock }} units left in stock!</span>
+                {% else %}
+                    <span class="status-badge status-out-of-stock"><i class="fa-solid fa-circle-xmark"></i> Currently Out of Stock</span>
+                {% endif %}
+            </div>
+
+            <div class="detail-description">
+                <h3>Product Overview</h3>
+                <p>{{ product.description }}</p>
+            </div>
+
+            <!-- Features Bullet List -->
+            <div class="detail-specs-box">
+                <h4>Key Highlights</h4>
+                <ul class="specs-list">
+                    <li><i class="fa-solid fa-check"></i> Premium industrial build and ergonomic materials</li>
+                    <li><i class="fa-solid fa-check"></i> Universal compatibility across modern devices</li>
+                    <li><i class="fa-solid fa-check"></i> Fast dispatch & simulated real-time tracking</li>
+                </ul>
+            </div>
+
+            <!-- Add to Cart Form -->
+            {% if product.is_in_stock %}
+                <form action="{% url 'add_to_cart' product.id %}" method="POST" class="add-to-cart-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'product_detail' product.id %}">
+                    
+                    <div class="quantity-control-group">
+                        <label for="quantityInput" class="qty-label">Quantity:</label>
+                        <div class="qty-stepper">
+                            <button type="button" class="qty-btn" onclick="decrementQty()"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="quantityInput" name="quantity" value="1" min="1" max="{{ product.stock }}" class="qty-input">
+                            <button type="button" class="qty-btn" onclick="incrementQty({{ product.stock }})"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons-group">
+                        <button type="submit" class="btn btn-primary btn-lg flex-1">
+                            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                        </button>
+                        <button type="submit" name="redirect_to" value="cart" class="btn btn-secondary btn-lg flex-1">
+                            <i class="fa-solid fa-bolt"></i> Buy Now
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div class="out-of-stock-notice">
+                    <p>This item is currently out of stock. Check back soon or browse similar items below.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+        <section class="related-section">
+            <h3 class="section-title">Similar Products in {{ product.category }}</h3>
+            <div class="products-grid products-grid-sm">
+                {% for item in related_products %}
+                    <div class="product-card">
+                        <div class="product-media">
+                            <a href="{% url 'product_detail' item.id %}">
+                                <img src="{{ item.display_image }}" alt="{{ item.name }}">
+                            </a>
+                        </div>
+                        <div class="product-info">
+                            <h4 class="product-title"><a href="{% url 'product_detail' item.id %}">{{ item.name }}</a></h4>
+                            <div class="product-footer-bar">
+                                <span class="price-amount">${{ item.price }}</span>
+                                <a href="{% url 'product_detail' item.id %}" class="btn btn-sm btn-outline">View</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function decrementQty() {
+        const input = document.getElementById('quantityInput');
+        let current = parseInt(input.value) || 1;
+        if (current > 1) {
+            input.value = current - 1;
+        }
+    }
+
+    function incrementQty(maxStock) {
+        const input = document.getElementById('quantityInput');
+        let current = parseInt(input.value) || 1;
+        if (current < maxStock) {
+            input.value = current + 1;
+        }
+    }
+</script>
+{% endblock %}

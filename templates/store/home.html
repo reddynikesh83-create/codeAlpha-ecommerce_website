@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}AlphaShop | Modern Tech & Lifestyle Store{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container hero-container">
+        <div class="hero-content">
+            <div class="hero-tag"><i class="fa-solid fa-bolt"></i> Featured Summer Collection</div>
+            <h1 class="hero-title">Discover Premium Tech & Modern Gadgets</h1>
+            <p class="hero-subtitle">
+                Explore curated electronics, audio essentials, wearables, and productivity gear with responsive design, instant cart updates, and seamless simulated checkout.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#productCatalog" class="btn btn-primary btn-lg"><i class="fa-solid fa-arrow-down"></i> Browse Products</a>
+                <a href="{% url 'cart' %}" class="btn btn-outline btn-lg"><i class="fa-solid fa-cart-shopping"></i> View Cart ({{ cart_count }})</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Responsive</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">Django</span>
+                    <span class="stat-label">SQLite Backend</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">CRUD</span>
+                    <span class="stat-label">Admin Ready</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-media">
+            <div class="hero-image-card">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80" alt="Featured Tech Product">
+                <div class="hero-badge-float">
+                    <div class="badge-dot"></div>
+                    <div>
+                        <strong>Apex Pro ANC</strong>
+                        <p>$199.99 &bull; ★ 4.9</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product Catalog Section -->
+<section class="catalog-section" id="productCatalog">
+    <div class="container">
+        <!-- Section Header & Filter Toolbar -->
+        <div class="catalog-header">
+            <div>
+                <h2 class="section-title">Explore Our Collection</h2>
+                <p class="section-subtitle">Showing {{ total_products }} high-performance products</p>
+            </div>
+
+            <!-- Sorting & Search Info Form -->
+            <form method="GET" action="{% url 'home' %}#productCatalog" class="sort-form">
+                {% if query %}
+                    <input type="hidden" name="q" value="{{ query }}">
+                {% endif %}
+                {% if selected_category and selected_category != 'All' %}
+                    <input type="hidden" name="category" value="{{ selected_category }}">
+                {% endif %}
+                <label for="sortSelect" class="sort-label"><i class="fa-solid fa-arrow-down-wide-short"></i> Sort By:</label>
+                <select name="sort" id="sortSelect" class="form-select sort-select" onchange="this.form.submit()">
+                    <option value="" {% if not sort %}selected{% endif %}>Latest Arrivals</option>
+                    <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Top Rated</option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="category-pills-bar">
+            <a href="{% url 'home' %}{% if query %}?q={{ query }}{% endif %}#productCatalog" 
+               class="category-pill {% if selected_category == 'All' %}active{% endif %}">
+               All Products
+            </a>
+            {% for cat in all_categories %}
+                <a href="{% url 'home' %}?category={{ cat }}{% if query %}&q={{ query }}{% endif %}#productCatalog" 
+                   class="category-pill {% if selected_category == cat %}active{% endif %}">
+                   {{ cat }}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- Active Filter Indicator if Search or Category active -->
+        {% if query or selected_category != 'All' %}
+            <div class="active-filters-info">
+                <span>Active filters: 
+                    {% if selected_category != 'All' %}<strong>Category: {{ selected_category }}</strong>{% endif %}
+                    {% if query %} &bull; <strong>Query: "{{ query }}"</strong>{% endif %}
+                </span>
+                <a href="{% url 'home' %}#productCatalog" class="clear-filter-link"><i class="fa-solid fa-xmark"></i> Reset Filters</a>
+            </div>
+        {% endif %}
+
+        <!-- Products Grid -->
+        {% if products %}
+            <div class="products-grid">
+                {% for product in products %}
+                    <article class="product-card">
+                        <!-- Product Image Box -->
+                        <div class="product-media">
+                            <a href="{% url 'product_detail' product.id %}">
+                                <img src="{{ product.display_image }}" alt="{{ product.name }}" loading="lazy">
+                            </a>
+                            <span class="category-tag">{{ product.category }}</span>
+                            {% if product.stock <= 5 and product.stock > 0 %}
+                                <span class="stock-badge stock-low">Only {{ product.stock }} left!</span>
+                            {% elif product.stock <= 0 %}
+                                <span class="stock-badge stock-out">Out of Stock</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Product Content Info -->
+                        <div class="product-info">
+                            <div class="product-rating">
+                                <span class="star-rating">
+                                    <i class="fa-solid fa-star"></i> {{ product.rating }}
+                                </span>
+                                <span class="review-count">({{ product.stock }} in stock)</span>
+                            </div>
+
+                            <h3 class="product-title">
+                                <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+                            </h3>
+
+                            <p class="product-desc-snippet">{{ product.description|truncatewords:12 }}</p>
+
+                            <div class="product-footer-bar">
+                                <div class="price-box">
+                                    <span class="price-currency">$</span>
+                                    <span class="price-amount">{{ product.price }}</span>
+                                </div>
+
+                                <div class="card-action-btns">
+                                    <a href="{% url 'product_detail' product.id %}" class="btn btn-secondary btn-icon-only" title="View Product Details">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    
+                                    {% if product.is_in_stock %}
+                                        <form action="{% url 'add_to_cart' product.id %}" method="POST" class="inline-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn btn-primary btn-sm" title="Add to Cart">
+                                                <i class="fa-solid fa-cart-plus"></i> Add
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <button class="btn btn-disabled btn-sm" disabled>Sold Out</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty Search / Filter Result -->
+            <div class="empty-state-card">
+                <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+                <h3>No products found</h3>
+                <p>We couldn't find any items matching your selected criteria.</p>
+                <a href="{% url 'home' %}#productCatalog" class="btn btn-primary"><i class="fa-solid fa-rotate-left"></i> View All Products</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

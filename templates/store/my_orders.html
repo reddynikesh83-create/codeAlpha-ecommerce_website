@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}My Order History | AlphaShop{% endblock %}
+
+{% block content %}
+<div class="container my-orders-container">
+    <div class="page-header-box">
+        <h1 class="page-title"><i class="fa-solid fa-box-archive"></i> My Order History</h1>
+        <p class="page-subtitle">Track and review all previous purchases associated with your account</p>
+    </div>
+
+    {% if orders %}
+        <div class="orders-list-wrap">
+            {% for order in orders %}
+                <div class="order-card">
+                    <!-- Order Card Header -->
+                    <div class="order-card-header">
+                        <div class="order-header-left">
+                            <span class="order-ref">Order #ORD-{{ order.id|stringformat:"05d" }}</span>
+                            <span class="order-date"><i class="fa-regular fa-calendar"></i> {{ order.created_at|date:"M d, Y &bull; h:i A" }}</span>
+                        </div>
+                        <div class="order-header-right">
+                            <span class="status-pill status-{{ order.status|lower }}">{{ order.status }}</span>
+                            <span class="order-total-badge">${{ order.total_amount }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Order Card Body: Items -->
+                    <div class="order-card-body">
+                        <div class="order-items-grid">
+                            {% for item in order.items.all %}
+                                <div class="order-item-chip">
+                                    <div class="item-chip-content">
+                                        <div class="item-name"><strong>{{ item.product_name }}</strong></div>
+                                        <div class="item-calc">Qty: {{ item.quantity }} &times; ${{ item.price }}</div>
+                                    </div>
+                                    <div class="item-sub">${{ item.line_total }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="order-shipping-meta">
+                            <i class="fa-solid fa-location-dot"></i> Shipped to: {{ order.full_name }}, {{ order.address }}, {{ order.city }} ({{ order.postal_code }})
+                        </div>
+                    </div>
+
+                    <!-- Order Card Footer -->
+                    <div class="order-card-footer">
+                        <span class="items-count-text">{{ order.items.count }} item(s)</span>
+                        <div class="order-actions">
+                            <a href="{% url 'order_success' order.id %}" class="btn btn-sm btn-outline">
+                                <i class="fa-solid fa-receipt"></i> View Full Receipt
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty Orders State -->
+        <div class="empty-state-card">
+            <div class="empty-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+            <h3>No Orders Placed Yet</h3>
+            <p>You haven't placed any orders yet. Discover our tech gadgets and place your first order!</p>
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg"><i class="fa-solid fa-bag-shopping"></i> Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

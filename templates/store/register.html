@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account | AlphaShop{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle"><i class="fa-solid fa-user-plus"></i></div>
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Register to track orders, save shipping info, and enjoy fast checkout</p>
+        </div>
+
+        <form method="POST" action="{% url 'register' %}" class="auth-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-row">
+                <div class="form-group col-6">
+                    <label class="form-label">First Name *</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="form-error">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group col-6">
+                    <label class="form-label">Last Name *</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="form-error">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="form-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="form-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-6">
+                    <label class="form-label">Password *</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="form-error">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group col-6">
+                    <label class="form-label">Confirm Password *</label>
+                    {{ form.confirm_password }}
+                    {% if form.confirm_password.errors %}
+                        <div class="form-error">{{ form.confirm_password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block auth-btn">
+                <i class="fa-solid fa-user-plus"></i> Complete Registration
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

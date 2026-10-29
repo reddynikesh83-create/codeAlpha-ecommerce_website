@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In | AlphaShop{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to your account to manage orders and checkout faster</p>
+        </div>
+
+        <form method="POST" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="auth-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="id_username" class="form-label">Username</label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" name="username" autofocus required id="id_username" class="form-input" placeholder="Enter username (e.g. demo_user)">
+                </div>
+                {% if form.username.errors %}
+                    <div class="form-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password" class="form-label">Password</label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" name="password" required id="id_password" class="form-input" placeholder="Enter password">
+                </div>
+                {% if form.password.errors %}
+                    <div class="form-error">{{ form.password.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block auth-btn">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+            </button>
+        </form>
+
+        <!-- Quick Demo Credentials Box -->
+        <div class="demo-creds-box">
+            <h4><i class="fa-solid fa-key"></i> Quick Test Credentials</h4>
+            <div class="cred-row">
+                <span>Customer:</span>
+                <code>demo_user</code> / <code>password123</code>
+            </div>
+            <div class="cred-row">
+                <span>Administrator:</span>
+                <code>admin</code> / <code>admin123</code>
+            </div>
+        </div>
+
+        <div class="auth-footer">
+            <p>Don't have an account yet? <a href="{% url 'register' %}">Create account</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

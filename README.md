@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AlphaShop - Simple E-Commerce Store
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
@@ -245,3 +246,6 @@ Use this step-by-step checklist to test and demonstrate all requirements:
 - `SECRET_KEY` in `settings.py` reads from environment variables (`os.environ.get('DJANGO_SECRET_KEY')`) with a secure fallback for local development.
 - CSRF tokens (`{% csrf_token %}`) protect all forms (login, registration, cart additions, checkout).
 - Sensitive passwords are never stored in plaintext; Django's cryptographic PBKDF2 hashing algorithm is utilized.
+=======
+# codeAlpha-ecommerce_website
+>>>>>>> d8a5901c67b425abdd61a41146e7fe98d2dc1275
